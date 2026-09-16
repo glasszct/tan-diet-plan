@@ -1,0 +1,43 @@
+name: Daily plan email
+
+on:
+  schedule:
+    - cron: "0 22 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    env:
+      SITE_URL: https://glasszct.github.io/tan-diet-plan/
+      SMTP_HOST: smtp.qq.com
+      SMTP_PORT: "465"
+      SMTP_USER: 1532986525@qq.com
+      SMTP_TO: 1532986525@qq.com
+      SMTP_HTML_FILE: mail-body.html
+      QQ_SMTP_CODE: ${{ secrets.QQ_SMTP_CODE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Generate today plan
+        run: node work/mail-plan.js --out=mail-body.html --subject-out=mail-subject.txt --site-url="$SITE_URL"
+      - name: Send email
+        run: |
+          export SMTP_SUBJECT="$(cat mail-subject.txt)"
+          node work/smtp-send.js
+      - name: Keep schedule active
+        if: github.event_name == 'schedule'
+        run: |
+          if [ ! -f .heartbeat ] || [ -n "$(find .heartbeat -mtime +25)" ]; then
+            date -u +%F > .heartbeat
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .heartbeat
+            git commit -m "Keep daily schedule active"
+            git push
+          fi

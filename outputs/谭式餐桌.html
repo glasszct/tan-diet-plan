@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>谭式餐桌 · 我的每日饮食与训练方案</title>
+<style>
+:root{
+  --bg:#F4F7F4; --surface:#FFFFFF; --ink:#20302A; --muted:#68786F;
+  --green-900:#173F32; --green:#2E7D5B; --green-soft:#E4F0EA;
+  --blue:#4C8DAB; --blue-soft:#E6F1F6;
+  --accent:#D95D39; --amber:#E9C46A;
+  --line:#E2E9E4; --radius:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink);
+  font:15px/1.65 "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+
+.top{background:linear-gradient(135deg,#173F32 0%,#215843 100%);color:#F2F7F4;padding:26px 0 22px}
+.toprow{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.top h1{font-size:23px;font-weight:700;letter-spacing:1px}
+.top .sub{color:#A8C5B6;font-size:13px;margin-top:2px}
+.datebox{text-align:right}
+.datebox .d{font-size:18px;font-weight:600}
+.datebox .w{color:#A8C5B6;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:999px;
+  padding:4px 12px;font-size:13px;color:#EAF3EE}
+.chip b{font-weight:700}
+
+section{margin:26px 0}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.sec-head h2{font-size:18px;font-weight:700;padding-left:12px;position:relative}
+.sec-head h2::before{content:"";position:absolute;left:0;top:3px;bottom:3px;width:4px;border-radius:2px;background:var(--green)}
+.sec-head .note{color:var(--muted);font-size:12.5px}
+
+.recomp{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:stretch}
+.logic{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.logic-title{font-weight:700;font-size:14.5px;margin-bottom:10px}
+.logic-list{list-style:none;display:flex;flex-direction:column;gap:9px}
+.logic-list li{font-size:13.5px;color:var(--muted);display:flex;gap:8px;line-height:1.55}
+.logic-list li b{color:var(--ink);flex:none}
+.cycle{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:300px}
+.cycle-day{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.cycle-day.on{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green);background:var(--green-soft)}
+.cd-label{font-size:13px;font-weight:700;color:var(--muted)}
+.cycle-day.on .cd-label{color:var(--green-900)}
+.cd-kcal{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.cd-kcal small{font-size:12px;font-weight:400;color:var(--muted)}
+.cd-macros{display:flex;flex-wrap:wrap;gap:6px;font-size:12px;color:var(--muted)}
+.cd-macros span{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:2px 8px}
+.macro-row{display:grid;grid-template-columns:52px 1fr 88px;align-items:center;gap:10px;margin:5px 0;font-size:13px}
+.macro-row .lab{color:var(--muted)}
+.macro-row .val{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.bar{height:8px;border-radius:99px;background:var(--bg);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:99px}
+.meal,.ex,.skin-card,.tracker,.p,.restcard,.plate-band,.notify,.logic,.cycle-day{box-shadow:0 1px 2px rgba(23,63,50,.05)}
+.tip{margin-top:10px;font-size:13px;color:var(--muted)}
+.tip b{color:var(--ink)}
+
+.daynav{display:flex;align-items:center;gap:10px}
+.daynav button.nav{width:34px;height:34px;border-radius:var(--radius);border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);font-size:17px;line-height:1;display:grid;place-items:center}
+.daynav button.nav:hover{border-color:var(--green);color:var(--green)}
+.daynav .cur{font-weight:600;min-width:170px;text-align:center}
+.daynav .cur small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.banner{border-radius:var(--radius);padding:10px 14px;font-size:13.5px;margin-bottom:12px;border:1px solid}
+.banner.train{background:var(--green-soft);border-color:#C8E0D3;color:var(--green-900)}
+.banner.rest{background:var(--blue-soft);border-color:#CBDFEA;color:#2C5D75}
+.banner b{font-weight:700}
+.progress{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:13px;color:var(--muted)}
+.progress .bar{flex:1}
+.progress .bar>i{background:var(--green);transition:width .3s}
+.meals{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.meal{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;
+  display:flex;flex-direction:column;gap:10px;transition:opacity .2s}
+.meal.done{opacity:.62}
+.meal-top{display:flex;align-items:center;gap:10px}
+.meal-top .ic{width:34px;height:34px;border-radius:var(--radius);background:var(--green-soft);
+  color:var(--green-900);display:grid;place-items:center;flex:none}
+.meal-top .nm{font-weight:700}
+.meal-top .tm{color:var(--muted);font-size:12.5px;margin-top:1px}
+.meal-top .meta{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.meal-top .kc{font-size:12.5px;color:var(--green-900);background:var(--green-soft);
+  border-radius:99px;padding:3px 10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.meal-top .pro{font-size:12px;color:#2C5D75;background:var(--blue-soft);
+  border-radius:99px;padding:3px 9px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.meal ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+.meal li{display:flex;gap:8px;align-items:baseline;font-size:14px}
+.meal li::before{content:"";width:5px;height:5px;border-radius:99px;background:var(--green);flex:none;transform:translateY(-2px)}
+.check{align-self:flex-start;border:1px solid var(--line);background:var(--bg);
+  border-radius:var(--radius);padding:6px 14px;font-size:13px;color:var(--muted)}
+.check[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
+.check[aria-pressed="true"]::before{content:"\2713  "}
+.meal .check{margin-top:auto}
+.total-line{margin-top:12px;text-align:right;color:var(--muted);font-size:13px}
+.total-line b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+.exs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;
+  display:flex;gap:14px;transition:opacity .2s}
+.ex.done{opacity:.62}
+.demo{width:120px;height:128px;flex:none;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);
+  display:grid;place-items:center;overflow:hidden}
+.exinfo{display:flex;flex-direction:column;gap:6px;min-width:0}
+.exinfo .nm{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.exinfo .sets{font-size:12px;font-weight:600;color:var(--green-900);background:var(--green-soft);
+  border-radius:99px;padding:2px 10px;font-variant-numeric:tabular-nums}
+.cues{list-style:none;display:flex;flex-direction:column;gap:3px}
+.cues li{font-size:12.5px;color:var(--muted);display:flex;gap:6px}
+.cues li::before{content:"";width:4px;height:4px;border-radius:99px;background:var(--amber);flex:none;margin-top:8px}
+.src{font-size:12px;color:var(--blue);text-decoration:none;margin-top:auto}
+.src:hover{text-decoration:underline}
+.warmup{background:var(--surface);border:1px dashed var(--line);border-radius:var(--radius);
+  padding:10px 14px;font-size:13px;color:var(--muted);margin-bottom:12px}
+.warmup b{color:var(--ink)}
+.restcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;
+  display:flex;gap:16px;align-items:center}
+.restcard .big{width:52px;height:52px;border-radius:99px;background:var(--blue-soft);color:var(--blue);
+  display:grid;place-items:center;flex:none}
+.restcard .tt{font-weight:700;margin-bottom:2px}
+.restcard .dd{font-size:13.5px;color:var(--muted)}
+
+.skin-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.skin-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px 18px;display:flex;flex-direction:column;gap:10px;transition:opacity .2s}
+.skin-card.done{opacity:.62}
+.skin-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.skin-tag{font-weight:700;font-size:13.5px;padding:3px 12px;border-radius:99px}
+.skin-tag.am{background:var(--blue-soft);color:#2C5D75}
+.skin-tag.pm{background:var(--green-soft);color:var(--green-900)}
+.steps{list-style:none;counter-reset:st;display:flex;flex-direction:column;gap:8px}
+.steps li{display:flex;gap:10px;font-size:13.5px}
+.steps li::before{counter-increment:st;content:counter(st);width:18px;height:18px;border-radius:99px;
+  background:var(--bg);border:1px solid var(--line);color:var(--muted);font-size:11px;
+  display:grid;place-items:center;flex:none;transform:translateY(2px)}
+.steps .q{color:var(--muted);font-size:12.5px;display:block}
+.skin-note{font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
+.wide{grid-column:1/-1}
+.prods{display:flex;flex-direction:column}
+.prod{display:grid;grid-template-columns:96px 1fr auto;gap:10px;padding:8px 0;
+  border-bottom:1px dashed var(--line);font-size:13.5px;align-items:baseline}
+.prod:last-child{border-bottom:0}
+.prod .cat{color:var(--muted);font-size:12.5px}
+.prod .nm small{color:var(--muted);font-size:12px}
+.prod .pr{font-variant-numeric:tabular-nums;font-weight:700;color:var(--green-900);white-space:nowrap}
+.phase{display:flex;gap:10px;font-size:13px}
+.phase .w{flex:none;width:86px;font-weight:700;color:var(--green-900);font-size:12.5px;font-variant-numeric:tabular-nums}
+.phase span:last-child{color:var(--muted)}
+.avoid{list-style:none;display:flex;flex-direction:column;gap:6px}
+.avoid li{font-size:13px;color:var(--muted);display:flex;gap:8px}
+.avoid li::before{content:"\00D7";color:var(--accent);font-weight:700;flex:none}
+
+.plate-band{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;display:grid;grid-template-columns:230px 1fr;gap:24px;align-items:center}
+.plate{width:220px;height:220px;border-radius:50%;margin:0 auto;position:relative;
+  background:conic-gradient(#57A773 0 50%, #D95D39 50% 75%, #E9C46A 75% 100%);
+  box-shadow:inset 0 0 0 10px #fff, inset 0 0 0 11px var(--line), 0 4px 14px rgba(23,63,50,.12)}
+.plate::after{content:"211";position:absolute;inset:0;display:grid;place-items:center;
+  font-weight:800;font-size:26px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+.legend{display:flex;flex-direction:column;gap:9px}
+.legend .li{display:flex;gap:10px;align-items:baseline;font-size:14px}
+.legend .dot{width:12px;height:12px;border-radius:4px;flex:none;transform:translateY(1px)}
+.legend b{font-variant-numeric:tabular-nums}
+.order{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);font-size:13.5px;color:var(--muted)}
+.order b{color:var(--ink)}
+.order ol{display:flex;flex-wrap:wrap;gap:6px 14px;list-style:none;margin-top:6px}
+.order li{display:flex;align-items:center;gap:6px}
+.order .n{width:18px;height:18px;border-radius:99px;background:var(--green);color:#fff;
+  font-size:11px;display:grid;place-items:center;flex:none}
+
+.trackers{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tracker{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.tracker h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.tracker h3 .ic{color:var(--blue)}
+.tracker .hint{color:var(--muted);font-size:12.5px;margin-bottom:12px}
+.cups{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.cup{height:46px;border:2px solid var(--line);border-radius:4px 4px 8px 8px;background:var(--bg);
+  position:relative;overflow:hidden;padding:0}
+.cup>i{position:absolute;left:0;right:0;bottom:0;height:0;background:var(--blue);transition:height .25s}
+.cup.on>i{height:100%}
+.cup.on{border-color:var(--blue)}
+.water-line{margin-top:10px;font-size:13px;color:var(--muted)}
+.water-line b{color:var(--ink)}
+.wlog{display:flex;gap:8px;margin-bottom:14px}
+.wlog input{flex:1;min-width:0;border:1px solid var(--line);border-radius:var(--radius);padding:8px 12px;font:inherit}
+.wlog button{border:0;background:var(--green);color:#fff;border-radius:var(--radius);padding:8px 16px;font-weight:600}
+.wbars{display:flex;align-items:flex-end;gap:8px;height:96px;padding-top:6px}
+.wbar{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.wbar .b{width:100%;max-width:26px;border-radius:4px 4px 0 0;background:linear-gradient(180deg,#57A773,#2E7D5B)}
+.wbar .t{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.wstats{font-size:13px;color:var(--muted);margin-top:10px}
+.wstats b{color:var(--ink)}
+.empty{color:var(--muted);font-size:13px;padding:18px 0;text-align:center}
+
+.principles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.p{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 16px;display:flex;gap:12px}
+.p .no{width:26px;height:26px;border-radius:99px;background:var(--green-soft);color:var(--green-900);
+  font-weight:700;font-size:13px;display:grid;place-items:center;flex:none;font-variant-numeric:tabular-nums}
+.p .tt{font-weight:600;font-size:14px}
+.p .dd{color:var(--muted);font-size:13px;margin-top:2px}
+
+.notify{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px 18px;display:flex;gap:12px;align-items:flex-start}
+.notify input{width:18px;height:18px;margin-top:3px;accent-color:var(--green)}
+.notify .tt{font-weight:600;font-size:14px}
+.notify .dd{color:var(--muted);font-size:12.5px;margin-top:2px}
+footer{color:var(--muted);font-size:12.5px;padding:26px 0 34px;line-height:1.8}
+footer .wrap{border-top:1px solid var(--line);padding-top:18px}
+
+@media (max-width:760px){
+  .meals,.trackers,.principles,.exs{grid-template-columns:1fr}
+  .recomp{grid-template-columns:1fr}
+  .cycle{min-width:0}
+  .plate-band{grid-template-columns:1fr}
+  .datebox{text-align:left}
+  .ex{flex-direction:column}
+  .demo{width:100%;height:140px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="toprow">
+      <div>
+        <h1>谭式餐桌</h1>
+        <p class="sub">谭成义饮食私教 · 增肌减脂同时进行 · 饮食 + 训练 + 护肤</p>
+      </div>
+      <div class="datebox">
+        <div class="d" id="todayDate"></div>
+        <div class="w" id="todayWeek"></div>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="chip">183 cm</span>
+      <span class="chip">72.5 kg</span>
+      <span class="chip">BMI 21.6 · 身体重组期</span>
+      <span class="chip">练一休一 · 每周约 3 练</span>
+      <span class="chip">今日热量目标 <b id="chipKcal">2400</b> kcal</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section>
+    <div class="sec-head"><h2>增肌减脂同时进行 · 身体重组</h2><span class="note">谭成义底层逻辑 · 183 cm / 72.5 kg · 每周 3 练（练一休一）· BMR ≈ 1740</span></div>
+    <div class="recomp">
+      <div class="logic">
+        <div class="logic-title">不靠热量盈余堆肌肉，只靠这三件事</div>
+        <ul class="logic-list">
+          <li><b>小缺口</b>每天 200~300 kcal，缺口一大训练状态就垮、肌肉跟着掉</li>
+          <li><b>训练强度</b>增肌的开关是重量、容量与组数，不是多吃</li>
+          <li><b>激素稳定</b>早睡 + 干净饮食 + 微微饥饿感，长期抗炎、持续进步</li>
+        </ul>
+      </div>
+      <div class="cycle" id="goalCycle" role="group" aria-label="训练日与休息日热量目标"></div>
+    </div>
+    <div id="macroBars" style="margin-top:14px"></div>
+    <p class="tip" id="goalTip"></p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>每日餐单</h2>
+      <div class="daynav">
+        <button class="nav" id="prevDay" aria-label="前一天">&#8249;</button>
+        <div class="cur" id="dayLabel"></div>
+        <button class="nav" id="nextDay" aria-label="后一天">&#8250;</button>
+      </div>
+    </div>
+    <div class="banner" id="dayBanner"></div>
+    <div class="progress"><div class="bar"><i id="progFill" style="width:0%"></i></div><span id="progText"></span></div>
+    <div class="meals" id="mealGrid"></div>
+    <p class="total-line" id="totalLine"></p>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>每日训练 · 谭成义 × 凯圣王三分化 · 练一天休一天</h2><span class="note" id="trainNote"></span></div>
+    <div id="trainBox"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>每日护肤 · 油皮痘肌方案</h2><span class="note">黑头 / 毛孔 / 痘印 / 出油 / 暗沉全部对因处理，全套 ≈ ¥340 用一季度</span></div>
+    <div class="skin-grid">
+      <article class="skin-card" id="skinAmCard">
+        <div class="skin-head"><span class="skin-tag am">早间 · 3 分钟</span><button type="button" class="check" id="skinAmBtn">标记完成</button></div>
+        <ol class="steps">
+          <li><div><b>温水洗脸</b>（油多就用氨基酸洁面）<span class="q">32-34°C 温水轻揉 20 秒，别用毛巾猛搓</span></div></li>
+          <li><div><b>烟酰胺精华 3-4 滴涂全脸</b><span class="q">控油、匀肤色、淡痘印，油皮的日间主力</span></div></li>
+          <li><div><b>清爽保湿乳</b><span class="q">选凝露/无油质地，油皮不保湿反而更油</span></div></li>
+          <li><div><b>防晒 SPF50，一元硬币量</b><span class="q">淡痘印、防暗沉最值钱的一步，出门必涂</span></div></li>
+        </ol>
+        <p class="skin-note">痘印变黑、肤色暗沉的元凶是紫外线，防晒不做其他全白做。肤色偏黑不追求漂白，目标是均匀透亮、气色干净。</p>
+      </article>
+      <article class="skin-card" id="skinPmCard">
+        <div class="skin-head"><span class="skin-tag pm">晚间 · 5 分钟</span><button type="button" class="check" id="skinPmBtn">标记完成</button></div>
+        <ol class="steps">
+          <li><div><b>氨基酸洁面</b><span class="q">重点揉 T 区和鼻翼 30 秒，黑头重灾区</span></div></li>
+          <li><div><b>阿达帕林 0.1% 豌豆大小薄涂全脸</b><span class="q">先隔晚用，耐受后每晚；调角质、淡痘印、细毛孔，8-12 周见效</span></div></li>
+          <li><div><b>水杨酸 2% 涂 T 区，每周 2-3 晚</b><span class="q">油溶性酸钻进毛孔溶黑头；与阿达帕林错开，同一晚只用一种酸</span></div></li>
+          <li><div><b>红肿痘单独点涂 2.5% 过氧化苯甲酰（班赛）</b><span class="q">只点在冒头的红肿痘上；短时接触法：薄涂 20 分钟可洗掉，减少干激和染枕头，不与其他酸同一点叠抹</span></div></li>
+          <li><div><b>保湿乳收尾</b><span class="q">用完酸更要保湿，屏障稳才不泛红脱皮</span></div></li>
+        </ol>
+        <p class="skin-note">每周再加 1 次泥膜敷 T 区 10 分钟（敷完立刻保湿），清黑头效率翻倍。</p>
+      </article>
+      <article class="skin-card">
+        <div class="skin-head"><span class="skin-tag pm">耐受节奏 · 别一上来就猛</span></div>
+        <div class="phase"><span class="w">第 1-2 周</span><span>只做清洁 + 保湿 + 防晒打基础；阿达帕林隔晚薄涂，泛红脱皮就再降频</span></div>
+        <div class="phase"><span class="w">第 3-4 周</span><span>阿达帕林升到每晚；每周 2 晚换成水杨酸涂 T 区，两种酸不叠加同一晚</span></div>
+        <div class="phase"><span class="w">第 5 周起</span><span>完整流程稳定执行，8-12 周看黑头、痘印、毛孔变化，皮肤更新周期是 28 天</span></div>
+      </article>
+      <article class="skin-card">
+        <div class="skin-head"><span class="skin-tag am">避坑清单</span></div>
+        <ul class="avoid">
+          <li>撕拉鼻贴、磨砂膏猛搓：毛孔越弄越大</li>
+          <li>一天洗脸超过 2 次：皮脂膜洗坏了反而更油</li>
+          <li>多种酸同一晚叠加：烂脸套餐</li>
+          <li>用了酸不防晒：痘印越晒越深</li>
+          <li>指望 7 天换脸：骗流量的话术，别信</li>
+          <li>挤痘、用手抠痘印：留疤留印更久</li>
+          <li>枕套毛巾不勤换：油脂细菌堆积，冒痘反复</li>
+          <li>逆毛流猛刮：剃须先顺毛、动作轻，刺激小</li>
+        </ul>
+      </article>
+      <article class="skin-card">
+        <div class="skin-head"><span class="skin-tag am">真实时间线 · 按皮肤更新周期来</span></div>
+        <div class="phase"><span class="w">2-4 周</span><span>出油见少、毛孔视觉上变细，黑头开始松动</span></div>
+        <div class="phase"><span class="w">8-12 周</span><span>痘痘显著减少、痘印开始变淡，阿达帕林和烟酰胺进入起效窗口</span></div>
+        <div class="phase"><span class="w">3-6 个月</span><span>痘印明显退浅、贴近肤色</span></div>
+        <div class="phase"><span class="w">90 天</span><span>仍无改善再考虑看皮肤科；别频繁换产品</span></div>
+      </article>
+      <article class="skin-card wide">
+        <div class="skin-head"><span class="skin-tag pm">高性价比产品清单 · 全是成分党平价货</span></div>
+        <div class="prods">
+          <div class="prod"><span class="cat">洁面</span><span class="nm">旁氏米粹氨基酸洁面乳 <small>早晚用，一管约 2 个月</small></span><span class="pr">¥25</span></div>
+          <div class="prod"><span class="cat">控油淡印</span><span class="nm">The Ordinary 10% 烟酰胺精华 <small>早间用，一瓶约 3 个月</small></span><span class="pr">¥65</span></div>
+          <div class="prod"><span class="cat">调角质</span><span class="nm">阿达帕林凝胶 0.1%（药店 OTC，达芙文同成分国产版即可）<small>晚间用，豌豆大小涂全脸，一支约 2 个月</small></span><span class="pr">¥40</span></div>
+          <div class="prod"><span class="cat">溶黑头</span><span class="nm">上水和肌 2% 水杨酸精华 <small>每周 2-3 晚涂 T 区，一瓶能用半年</small></span><span class="pr">¥50</span></div>
+          <div class="prod"><span class="cat">保湿</span><span class="nm">适乐肤 C 乳 236 ml <small>早晚用，神经酰胺修屏障，一瓶一个季度</small></span><span class="pr">¥90</span></div>
+          <div class="prod"><span class="cat">防晒</span><span class="nm">近江小熊蓝盖 SPF50+ <small>早间出门前 15 分钟涂，一瓶约 1 个月</small></span><span class="pr">¥35</span></div>
+          <div class="prod"><span class="cat">点涂痘痘</span><span class="nm">班赛 2.5% 过氧化苯甲酰凝胶 <small>仅红肿痘点涂，短时接触法，一支能用很久</small></span><span class="pr">¥30</span></div>
+          <div class="prod"><span class="cat">每周加强</span><span class="nm">悦诗风吟火山泥膜（可选）<small>每周 1 次敷 T 区 10 分钟</small></span><span class="pr">¥60</span></div>
+        </div>
+        <p class="skin-note">必备七件合计 ≈ ¥340，平均每月百元出头。按成分不按牌子：同成分更便宜的正规产品都能替换。平价口碑替代同样有效——CeraVe 洗面奶、碧柔水感防晒可替换同类；The Ordinary AHA30%+BHA2% 果酸面膜可作每周加强，务必先在耳后贴皮测试，且不与阿达帕林同一天用。</p>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>211 餐盘 · 每餐照着装</h2><span class="note">不用称、不算卡，拳头就是秤</span></div>
+    <div class="plate-band">
+      <div class="plate" role="img" aria-label="211餐盘：一半蔬菜、四分之一蛋白质、四分之一主食"></div>
+      <div>
+        <div class="legend">
+          <div class="li"><span class="dot" style="background:#57A773"></span><span><b>2 拳蔬菜</b> · 占餐盘一半，深色叶菜优先</span></div>
+          <div class="li"><span class="dot" style="background:#D95D39"></span><span><b>1 掌心蛋白质</b> · 鱼虾鸡胸瘦肉蛋，厚度约一掌</span></div>
+          <div class="li"><span class="dot" style="background:#E9C46A"></span><span><b>1 拳主食</b> · 米饭面条杂粮都算，粗粮更好</span></div>
+        </div>
+        <div class="order">
+          <b>吃饭顺序（同样重要）</b>
+          <ol>
+            <li><span class="n">1</span>先喝汤 / 吃菜</li>
+            <li><span class="n">2</span>再吃肉和蛋白质</li>
+            <li><span class="n">3</span>最后吃主食</li>
+            <li><span class="n">4</span>七分饱停筷</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>每日打卡</h2><span class="note">记录只存在本机浏览器，饮水每天自动清零</span></div>
+    <div class="trackers">
+      <div class="tracker">
+        <h3><span class="ic" id="dropIc"></span>饮水打卡</h3>
+        <p class="hint">目标 8 杯（约 2900 ml = 体重 72.5kg × 40ml），小口多次，别等渴了再喝</p>
+        <div class="cups" id="cups"></div>
+        <p class="water-line" id="waterLine"></p>
+      </div>
+      <div class="tracker">
+        <h3><span class="ic" id="scaleIc"></span>晨起体重</h3>
+        <p class="hint">每天晨起空腹排便后称一次，看周趋势，别纠结单日波动</p>
+        <div class="wlog">
+          <input id="wInput" type="number" step="0.1" min="40" max="150" placeholder="今日体重 kg，如 72.5">
+          <button id="wAdd">记录</button>
+        </div>
+        <div id="wChart"></div>
+        <p class="wstats" id="wStats"></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>谭成义「增肌减脂同时进行」底层逻辑 + 生活化执行</h2><span class="note">来自小红书视频及其要点总结，餐单与目标按此设计</span></div>
+    <div class="principles" id="principles"></div>
+  </section>
+
+  <section>
+    <label class="notify">
+      <input type="checkbox" id="notifyToggle">
+      <span>
+        <span class="tt">到点提醒：三餐加餐 + 晚间护肤（7:30 / 12:00 / 15:30 / 18:30 / 22:30）</span>
+        <p class="dd">浏览器通知，需授权并保持本页打开。餐单、训练和护肤打卡每天 0 点自动切换，养成每天打开一次本页的习惯，就是最简单的"每日推送"。</p>
+      </span>
+    </label>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    方案依据谭成义公开分享的《增肌减脂同时进行的底层逻辑》整理：小缺口 200~300 kcal、训练强度决定增肌、碳水 2.5~3.5 g/kg 波浪式、蛋白 1.2~2.0 g/kg、脂肪 0.6~0.8 g/kg + 欧米伽 3、每周有氧 3~4 次、早睡不熬夜；再叠加 211 餐盘、吃饭顺序、七分饱落地为每日餐单，并同步推 / 拉 / 腿三分化练一天休一天。<br>
+    训练动作、组数次数与要点来自谭成义、凯圣王公开的三分化跟练系列与透视学单动作详解，经 Exa 全网检索、小红书/抖音/B 站公开图文与字幕交叉比对。饮食部分原始视频已通过 opencli 小红书检索定位到，但站内视频正文接口仅返回标题与文案、未返回逐字字幕，因此增肌减脂同步的核心数值综合小红书同源要点笔记与 Exa 公开科普资料交叉整理，未直接抓取完整音频；每个动作卡右侧都附对应教学视频链接（B 站无需登录即可看动作）。动作卡左侧火柴人为本地绘制的循环示意图，仅示意动作模式，非视频原画面。计划默认下肢穿平底硬底鞋、新手遇杠铃罗马尼亚硬拉可先换臀桥。热量与营养素为估算值，如有疾病、孕期或运动伤病请遵医嘱。<br>
+    护肤方案综合 Exa 全网检索、Reddit r/SkincareAddiction 真实用户实测讨论与皮肤科主流共识（水杨酸溶黑头、阿达帕林调角质淡印、烟酰胺控油匀肤、过氧化苯甲酰点涂红肿痘、防晒防色沉）搭配平价成分型产品，无任何广告，价格会随渠道浮动；用酸初期轻微脱皮属正常，持续刺痛红肿请停用并就医。
+  </div>
+</footer>
+
+<script>
+"use strict";
+
+/* ================= 数据 ================= */
+var MENUS = [
+  { tag:"家常鸡胸日", meals:[
+    { name:"早餐", time:"7:30", kcal:500, pro:27, items:["全麦面包 2 片","水煮蛋 2 个","无糖豆浆 300 ml","小番茄 6 颗"] },
+    { name:"午餐", time:"12:00", kcal:850, pro:46, items:["米饭 1.5 拳（约 200 g）","青椒炒鸡胸 150 g","蒜蓉西兰花 2 拳","紫菜蛋花汤 1 碗"] },
+    { name:"加餐", time:"15:30", kcal:200, pro:9, items:["无糖酸奶 200 g","混合坚果 10 g（一小把）"] },
+    { name:"晚餐", time:"18:30", kcal:800, pro:45, items:["杂粮饭 1 拳","清蒸鲈鱼 150 g","凉拌黄瓜木耳 2 拳","冬瓜汤 1 碗"] }
+  ]},
+  { tag:"牛肉荞麦面日", meals:[
+    { name:"早餐", time:"7:30", kcal:480, pro:26, items:["燕麦 50 g + 纯牛奶 250 ml 煮","水煮蛋 1 个","香蕉半根"] },
+    { name:"午餐", time:"12:00", kcal:860, pro:40, items:["荞麦面 1.5 拳","卤牛肉 120 g","烫青菜 2 拳","海带汤 1 碗"] },
+    { name:"加餐", time:"15:30", kcal:180, pro:4, items:["苹果 1 个（水果下午 4 点前吃完）"] },
+    { name:"晚餐", time:"18:30", kcal:800, pro:44, items:["玉米 1 根","虾仁滑蛋（虾 120 g + 蛋 2 个）","白灼生菜 2 拳"] }
+  ]},
+  { tag:"外卖也能吃日", meals:[
+    { name:"早餐", time:"7:30", kcal:500, pro:24, items:["便利店：菜包 1 个","茶叶蛋 2 个","无糖豆浆 1 杯"] },
+    { name:"午餐", time:"12:00", kcal:850, pro:40, items:["沙县鸡腿饭：鸡腿去皮","米饭 1.5 拳","另加一份烫青菜","例汤 1 碗"] },
+    { name:"加餐", time:"15:30", kcal:180, pro:7, items:["无糖酸奶 200 g"] },
+    { name:"晚餐", time:"18:30", kcal:780, pro:34, items:["清汤麻辣烫：豆制品 + 绿叶菜 2 拳 + 菌菇","玉米段当主食 1 拳","少喝汤（汤里全是盐）"] }
+  ]},
+  { tag:"鱼虾粗粮日", meals:[
+    { name:"早餐", time:"7:30", kcal:520, pro:26, items:["蒸红薯 200 g","水煮蛋 2 个","无糖酸奶 100 g","蓝莓一小把"] },
+    { name:"午餐", time:"12:00", kcal:860, pro:44, items:["糙米饭 1.5 拳","番茄龙利鱼 200 g","蒜蓉油麦菜 2 拳"] },
+    { name:"加餐", time:"15:30", kcal:170, pro:3, items:["猕猴桃 2 个"] },
+    { name:"晚餐", time:"18:30", kcal:790, pro:38, items:["小米粥 1 碗","香煎三文鱼 120 g（少油）","烤时蔬 2 拳（西兰花/彩椒/芦笋）"] }
+  ]},
+  { tag:"家常鸡腿日", meals:[
+    { name:"早餐", time:"7:30", kcal:500, pro:25, items:["全麦三明治（鸡蛋 + 生菜 + 番茄）","纯牛奶 250 ml"] },
+    { name:"午餐", time:"12:00", kcal:850, pro:44, items:["米饭 1.5 拳","去皮卤鸡腿 1 只","干煸豆角 1.5 拳（少油）","番茄蛋汤 1 碗"] },
+    { name:"加餐", time:"15:30", kcal:190, pro:8, items:["无糖酸奶 150 g","草莓 6 颗"] },
+    { name:"晚餐", time:"18:30", kcal:780, pro:36, items:["杂粮馒头 1 个","虾仁豆腐煲","蒜蓉空心菜 2 拳"] }
+  ]},
+  { tag:"清爽面食日", meals:[
+    { name:"早餐", time:"7:30", kcal:490, pro:22, items:["小米粥 1 碗","全麦馒头半个","水煮蛋 1 个","凉拌黄瓜 1 拳"] },
+    { name:"午餐", time:"12:00", kcal:860, pro:38, items:["鸡胸肉丝荞麦凉面（面 1.5 拳 + 鸡胸 120 g）","拍黄瓜 1 拳","紫菜汤 1 碗"] },
+    { name:"加餐", time:"15:30", kcal:180, pro:2, items:["橙子 1 个"] },
+    { name:"晚餐", time:"18:30", kcal:800, pro:34, items:["米饭 1 拳","冬瓜排骨汤（排骨 3 块、撇浮油）","炒小白菜 2 拳"] }
+  ]},
+  { tag:"聚餐应对日", meals:[
+    { name:"早餐", time:"7:30", kcal:480, pro:23, items:["无糖豆浆 300 ml","水煮蛋 2 个","玉米半根"] },
+    { name:"午餐", time:"12:00", kcal:850, pro:36, items:["聚餐策略：先喝汤吃菜再动肉","肉优先鱼虾鸡，避开红烧油炸","主食最多 1 拳，酒换成无糖茶"] },
+    { name:"加餐", time:"15:30", kcal:170, pro:7, items:["无糖酸奶 200 g"] },
+    { name:"晚餐", time:"18:30", kcal:780, pro:33, items:["清淡收尾：蔬菜豆腐汤面（面 1 拳）","白灼虾 8 只","凉拌菠菜 1.5 拳"] }
+  ]}
+];
+
+var GOALS = {
+  train: { label:"训练日 · 增肌", kcal:2600, p:150, c:340, f:70,
+    tip:"训练日碳水拉满、红白肉交替吃；练后 30 分钟内补掉加餐，增肌靠训练强度不是靠塞饭。" },
+  rest:  { label:"休息日 · 减脂", kcal:2250, p:145, c:280, f:62,
+    tip:"休息日晚餐主食减半拳，睡前保持微微饥饿感，早睡推进修复，不动大重量。" }
+};
+
+/* 动作讲解链接：按谭成义 × 凯圣王三分化跟练系列 + 透视学单动作详解整理（B 站无需登录），
+   后两条为小红书/抖音公开的背、腿总结视频。 */
+var VIDEOS = [
+  "https://www.bilibili.com/video/BV1FcdZBNEm3",   // ① 训练计划
+  "https://www.bilibili.com/video/BV1CSoKBaEgK",   // ② 跟练胸肩三头
+  "https://www.bilibili.com/video/BV1ZHzMBmEtj",   // 透视学① 卧推详解
+  "https://www.bilibili.com/video/BV1xtzCBhEYN",   // 透视学② 哑铃推肩详解
+  "https://www.bilibili.com/video/BV1zyAUztE1n",   // 透视学④ 正反高位下拉区别
+  "https://www.bilibili.com/video/BV1qF6wBaEWu",   // 透视学③ 罗马尼亚硬拉详解
+  "https://www.douyin.com/shipin/7644761218397440051", // ④ 背肩后束二头篇
+  "https://www.bilibili.com/video/BV1Fzd2BBEdM"    // ⑤ 腿股四头肌腘绳肌跟练
+];
+
+/* 动作库：frames 为两帧火柴人，本地循环插值演示（图示为动作模式示意，非视频原画面）。
+   坐标系 120x124，地面 y=116。h=头，l=线段组。动作全部来自谭成义 × 凯圣王三分化五天跟练。 */
+var EX = {
+  bench:{ name:"杠铃卧推", sets:"4 组 · 热身 15-12-10-8 递增", period:2600, video:2,
+    cues:["空杆热身，15-12-10-8 逐步加重，正式组用 10-12 次力竭重量","肩胛后收下沉，别耸肩","杠落到下胸，肘与躯干约 45-75 度","脚踩实蹬地，背贴凳不拱腰"],
+    frames:[
+      { h:[20,86], l:[ [[30,94],[76,94]], [[76,94],[90,100],[106,112]], [[30,94],[38,100],[40,88]], [[30,94],[22,100],[20,88]] ] },
+      { h:[20,86], l:[ [[30,94],[76,94]], [[76,94],[90,100],[106,112]], [[30,94],[40,76],[40,58]], [[30,94],[20,76],[20,58]] ] }
+    ]},
+  incline:{ name:"哑铃上斜卧推", sets:"4 组 × 12 次 · 上斜凳约 45°", period:2400, video:1,
+    cues:["上斜凳调到约 45 度，过低会与平板卧推重复","哑铃下放到上胸两侧，别砸到底","推起顶端稍夹上胸，不锁死肘"],
+    frames:[
+      { h:[48,54], l:[ [[50,66],[64,92]], [[64,92],[80,104],[90,112]], [[50,66],[42,76],[40,62]], [[50,66],[58,76],[60,62]] ] },
+      { h:[48,54], l:[ [[50,66],[64,92]], [[64,92],[80,104],[90,112]], [[50,66],[38,48],[34,34]], [[50,66],[62,48],[66,34]] ] }
+    ]},
+  dip:{ name:"双杠臂屈伸", sets:"4 组 × 力竭 · 新手用辅助凳", period:2400, video:1,
+    cues:["主打下胸外沿和三头，难度偏高","新手先用辅助凳或弹力带退阶，做标准再撤","身体略前倾、肩下沉，下到大臂接近平行","不甩腰借力"],
+    frames:[
+      { h:[52,48], l:[ [[54,60],[58,84]], [[58,84],[62,100],[64,112]], [[54,60],[46,58],[44,68]], [[54,60],[62,58],[64,68]] ] },
+      { h:[52,36], l:[ [[54,48],[58,72]], [[58,72],[60,94],[64,112]], [[54,48],[46,40],[44,50]], [[54,48],[62,40],[64,50]] ] }
+    ]},
+  extension:{ name:"仰卧臂屈伸", sets:"4 组 × 15 次 · 凳约 15°", period:2200, video:1,
+    cues:["平板凳调到约 15 度，主练三头长头","大臂内收、微前倾，全程固定不动","只做前 2/3 行程，下放到头前侧感受三头拉伸","缓慢回正，别用肩膀压"],
+    frames:[
+      { h:[20,88], l:[ [[30,96],[74,96]], [[74,96],[88,102],[104,112]], [[30,96],[32,78],[28,64]], [[30,96],[24,78],[30,64]] ] },
+      { h:[20,88], l:[ [[30,96],[74,96]], [[74,96],[88,102],[104,112]], [[30,96],[34,86],[20,82]], [[30,96],[26,86],[40,82]] ] }
+    ]},
+  yraise:{ name:"Y 字侧平举", sets:"3 组 ×（10 + 休 5 秒 + 10）", period:2400, video:1,
+    cues:["龙门架调到下胸高度，训练侧手正握绳索，侧身站立向斜上方拉","主刺激肩中后束","做 10 次休 5 秒再接 10 次算一组，共 3 组","别耸肩，靠肩带起，不用腰甩"],
+    frames:[
+      { h:[56,26], l:[ [[56,40],[56,70]], [[56,70],[54,92],[52,114]], [[56,70],[58,92],[60,114]], [[56,40],[54,56],[52,72]] ] },
+      { h:[56,26], l:[ [[56,40],[56,70]], [[56,70],[54,92],[52,114]], [[56,70],[58,92],[60,114]], [[56,40],[70,44],[84,40]] ] }
+    ]},
+  cablepd:{ name:"单手钢线下拉", sets:"4 组 × 12 次 · 龙门架 45°凳", period:2400, video:6,
+    cues:["龙门架 + 45 度凳，滑轮调最高，换单侧握把","身体坐稳含胸，肘向斜后方夹，像向后肘击","肩胛先下沉再拉，顶端收紧背阔","慢回到肩胛完全打开，别被重量拽走"],
+    frames:[
+      { h:[48,40], l:[ [[50,52],[52,74]], [[52,74],[64,90],[72,112]], [[52,74],[40,90],[34,112]], [[50,52],[66,44],[80,36]] ] },
+      { h:[48,40], l:[ [[50,52],[52,74]], [[52,74],[64,90],[72,112]], [[52,74],[40,90],[34,112]], [[50,52],[42,58],[40,70]] ] }
+    ]},
+  widepd:{ name:"宽距对握高位下拉", sets:"4 组 × 10 次 · 对握宽距", period:2400, video:4,
+    cues:["对握宽距，身体中立，别向后仰","先沉肩胛，再把杆拉向锁骨上胸","感受大圆肌和上背发力，顶峰停半秒","慢放时仍控制，别让重量自由落体"],
+    frames:[
+      { h:[50,40], l:[ [[52,52],[54,74]], [[54,74],[42,90],[34,112]], [[54,74],[66,90],[72,112]], [[52,52],[38,40],[26,30]], [[52,52],[66,40],[78,30]] ] },
+      { h:[50,40], l:[ [[52,52],[54,74]], [[54,74],[42,90],[34,112]], [[54,74],[66,90],[72,112]], [[52,52],[44,56],[44,66]], [[52,52],[64,56],[64,66]] ] }
+    ]},
+  singlerow:{ name:"单手器械划船", sets:"4 组 × 10 次 / 侧", period:2200, video:6,
+    cues:["单手器械，专注背阔肌厚度，左右交替","肩带手，肘向后拉，顶端夹背阔","躯干和膝盖稳定，别转身借力"],
+    frames:[
+      { h:[50,44], l:[ [[52,56],[54,76]], [[54,76],[42,90],[36,112]], [[54,76],[66,90],[72,112]], [[52,56],[66,58],[78,60]] ] },
+      { h:[50,44], l:[ [[52,56],[54,76]], [[54,76],[42,90],[36,112]], [[54,76],[66,90],[72,112]], [[52,56],[42,60],[40,70]] ] }
+    ]},
+  widerow:{ name:"宽距坐姿划船", sets:"4 组 × 12 次 · 肩胛后缩", period:2400, video:6,
+    cues:["宽距握，主练中下斜方肌、改善圆肩驼背","肩胛向后下方充分收紧，中背挤压","躯干不后仰，拉到腹部稍停再慢放"],
+    frames:[
+      { h:[50,44], l:[ [[52,56],[54,76]], [[54,76],[42,90],[36,112]], [[54,76],[66,90],[72,112]], [[52,56],[40,62],[32,58]], [[52,56],[68,62],[76,58]] ] },
+      { h:[50,44], l:[ [[52,56],[54,76]], [[54,76],[42,90],[36,112]], [[54,76],[66,90],[72,112]], [[52,56],[44,62],[50,70]], [[52,56],[64,62],[58,70]] ] }
+    ]},
+  cablecurl:{ name:"绳索弯举", sets:"3 组 × 12 次 · 持续张力", period:2200, video:6,
+    cues:["绳索提供持续张力，对手腕更友好","肘固定在身体两侧，不借腰摆","三头可抵住身体，感受二头持续充血","下放放慢，顶端别锁死"],
+    frames:[
+      { h:[56,28], l:[ [[56,42],[56,72]], [[56,72],[54,92],[52,114]], [[56,72],[58,92],[60,114]], [[56,42],[54,58],[54,74]], [[56,42],[58,58],[58,74]] ] },
+      { h:[56,28], l:[ [[56,42],[56,72]], [[56,72],[54,92],[52,114]], [[56,72],[58,92],[60,114]], [[56,42],[54,54],[54,42]], [[56,42],[58,54],[58,42]] ] }
+    ]},
+  singlerdl:{ name:"单腿硬拉", sets:"4 组 × 12 次 / 腿", period:2600, video:7,
+    cues:["支撑腿微屈，对侧手握哑铃，背全程平直","髋向后推，身体前倾，非支撑腿随髋抬起并微内扣","感受大腿后侧和臀拉伸再起身","核心收紧，别弓腰，左右交替"],
+    frames:[
+      { h:[52,30], l:[ [[54,44],[54,70]], [[54,70],[54,92],[54,114]], [[54,70],[60,86],[68,104]], [[54,44],[48,58],[46,72]] ] },
+      { h:[78,66], l:[ [[72,72],[58,96]], [[58,96],[58,108],[58,114]], [[58,96],[84,94],[100,94]], [[72,72],[54,76],[44,80]] ] }
+    ]},
+  bulgarian:{ name:"保加利亚分腿蹲", sets:"4 组 × 10 次 / 腿", period:2600, video:7,
+    cues:["后脚搭凳，重心压在前腿，前膝对准脚尖","垂直下蹲，前腿大腿接近平行地面","双手持哑铃自然下垂，上身略前倾更稳","别用后腿蹬地借力"],
+    frames:[
+      { h:[50,28], l:[ [[52,42],[54,72]], [[54,72],[48,92],[46,114]], [[54,72],[64,84],[72,76]], [[52,42],[48,58],[46,72]], [[52,42],[58,58],[60,72]] ] },
+      { h:[50,48], l:[ [[52,60],[54,90]], [[54,90],[48,104],[46,114]], [[54,90],[62,98],[68,94]], [[52,60],[46,72],[44,84]], [[52,60],[58,72],[60,84]] ] }
+    ]},
+  goblet:{ name:"高脚杯深蹲", sets:"3 组 × 15 次 · 可负重递增", period:2400, video:7,
+    cues:["双手胸前抱哑铃，挺胸收腹，膝盖对脚尖","屁股往后坐，蹲到大腿平行或略低","可负重递增，循序渐进别盲目上重量","脚跟踩实，起身时臀腿一起发力"],
+    frames:[
+      { h:[52,28], l:[ [[54,42],[54,72]], [[54,72],[50,92],[48,114]], [[54,72],[58,92],[60,114]], [[54,42],[48,48],[52,58]] ] },
+      { h:[54,54], l:[ [[56,66],[50,86]], [[50,86],[44,102],[44,114]], [[50,86],[58,102],[62,114]], [[56,66],[54,74],[56,84]] ] }
+    ]},
+  rdl:{ name:"杠铃罗马尼亚硬拉", sets:"3 组 × 12 次 · 新手换臀桥", period:2600, video:5,
+    cues:["屈髋主导，背全程平直，杠沿腿下放","下放到大腿后侧充分拉伸","对腰椎压力大，新手或后侧柔韧不足建议换臀桥","起身夹臀，别用腰反弓硬拉"],
+    frames:[
+      { h:[52,28], l:[ [[54,42],[54,72]], [[54,72],[53,92],[53,114]], [[54,72],[56,92],[56,114]], [[54,42],[54,58],[54,74]] ] },
+      { h:[72,68], l:[ [[68,74],[58,96]], [[58,96],[57,106],[56,114]], [[58,96],[60,106],[60,114]], [[68,74],[52,80],[44,88]] ] }
+    ]},
+  backext:{ name:"山羊挺身", sets:"3 组 × 8 次 · 不过度反弓", period:2400, video:7,
+    cues:["身体保持一条直线，别过度反弓到伤腰","用竖脊肌控制，起身到头-髋-脚成直线即可","节奏控制，别甩，改善腰背不适"],
+    frames:[
+      { h:[40,72], l:[ [[46,78],[52,100]], [[52,100],[60,108],[66,114]], [[52,100],[44,108],[38,114]], [[46,78],[40,84],[42,92]] ] },
+      { h:[44,58], l:[ [[48,68],[52,96]], [[52,96],[60,106],[66,114]], [[52,96],[44,106],[38,114]], [[48,68],[44,74],[46,82]] ] }
+    ]}
+};
+
+var TRAIN = [
+  { title:"推日 · 胸肩三头", mins:38, warm:"泡沫轴滚胸椎 / 胸部扩张 + 开合跳 1 分钟 + 肩绕环，再用空杆做卧推热身组，微微出汗再上重量。",
+    exs:["bench","incline","dip","extension","yraise"] },
+  { title:"拉日 · 背三角肌后束二头", mins:38, warm:"仰卧胸椎屈曲（呼气下落、吸气起身）2-3 组 × 10 次 + 胸椎旋转 2-3 组 × 10 次，激活上背再练。",
+    exs:["cablepd","widepd","singlerow","widerow","cablecurl"] },
+  { title:"腿日 · 股四头肌腘绳肌", mins:40, warm:"腿部动态热身 + 髋绕环 + 徒手高脚杯深蹲 2 组，激活股四、腘绳与臀，平底硬底鞋更稳。",
+    exs:["singlerdl","bulgarian","goblet","rdl","backext"] }
+];
+var EPOCH = new Date(2026, 7, 31); /* 2026-08-31 = 推日，之后练一休一 */
+
+var PRINCIPLES = [
+  ["小缺口 200~300","增肌减脂能同时进行的关键，就是每天只开一个温和缺口；缺口一大会先垮训练状态、丢掉肌肉。"],
+  ["训练强度开增肌","增肌不完全靠吃出来的盈余，最直接的开关是重量、容量、组数与休息时间带来的力量提升。"],
+  ["碳水 2.5~3.5 g/kg","起步按 2.5~3.5 克每公斤波浪式调整：对干净碳水极度渴望就升到 4g，没胃口就降回 3g。"],
+  ["蛋白 1.2~2.0 g/kg","红白肉交替吃。碳水拉高可降蛋白，碳水压低就升蛋白；排气多且臭说明消化压力大，要减量。"],
+  ["脂肪 0.6~0.8 g/kg","提高橄榄油、坚果、牛油果里的欧米伽 3，压低生活里的欧米伽 6，身体才扛得住长期训练。"],
+  ["每周有氧 3~4 次","每次 30~40 分钟，提升线粒体能力；强度可以随体能提高，但别一次次拉长单次时长。"],
+  ["早睡不熬夜","睡眠给不到，激素就不稳、恢复就慢，抗炎和进步都打折扣，23 点前睡是底线。"],
+  ["状态是第一指标","真正看结果只看状态：训练欲望强、专注、精神抖擞、愿意社交；状态一掉就靠体重加照片排查，回头调饮食和睡眠。"],
+  ["211 餐盘","2 拳蔬菜 + 1 掌心蛋白质 + 1 拳主食。不用称不用算，拳头就是你的秤。"],
+  ["吃饭顺序","先喝汤吃菜，再吃肉，最后主食。同样的饭菜，顺序对了血糖更稳、更容易饱。"],
+  ["七分饱 + 微饿","每餐七分饱停筷，睡前保持一点点饥饿感，是长期减脂又抗炎的荷尔蒙信号。"],
+  ["外食口诀","麻辣烫选清汤多菜、鸡腿饭去皮、沙拉酱另放、饮料只点无糖，聚餐先喝汤吃菜再动肉。"]
+];
+
+/* ================= 工具 ================= */
+function $(s){ return document.querySelector(s); }
+function pad(n){ return String(n).padStart(2,"0"); }
+function keyOf(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function dayIdx(d){
+  var start = new Date(d.getFullYear(),0,0);
+  return Math.floor((d-start)/864e5) % MENUS.length;
+}
+function planOf(d){
+  var a = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  var diff = Math.round((a - EPOCH)/864e5);
+  var parity = ((diff % 2) + 2) % 2;
+  if (parity === 1) return { rest:true };
+  var ti = Math.floor(diff/2), m = ((ti % TRAIN.length) + TRAIN.length) % TRAIN.length;
+  return { rest:false, idx:m };
+}
+var store = {
+  get:function(k,f){ try{ var v=localStorage.getItem(k); return v==null?f:JSON.parse(v); }catch(e){ return f; } },
+  set:function(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+var WEEKS = ["周日","周一","周二","周三","周四","周五","周六"];
+var ICONS = {
+  breakfast:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v6"/><path d="m5 10 1.5 1.5"/><path d="m17.5 11.5 1.5-1.5"/><path d="M3 18h18"/><path d="M7 18a5 5 0 0 1 10 0"/></svg>',
+  lunch:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  snack:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="6"/><path d="M12 7c0-2.5 1.6-4 3.8-4"/></svg>',
+  dinner:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>',
+  drop:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3s6.5 7 6.5 11.2a6.5 6.5 0 0 1-13 0C5.5 10 12 3 12 3Z"/></svg>',
+  scale:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 12l3-3"/></svg>',
+  walk:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="1.6"/><path d="M13 8l-2.5 5L8 15l-1 5"/><path d="M13 8l3 3 3 1"/><path d="M10.5 13l3.5 2 1 5"/></svg>'
+};
+var MEAL_ICON = { "早餐":"breakfast", "午餐":"lunch", "加餐":"snack", "晚餐":"dinner" };
+
+var today = new Date();
+var viewDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+function goalFor(plan){ return GOALS[plan.rest ? "rest" : "train"]; }
+
+/* ================= 动作演示动画 ================= */
+var SVGNS = "http://www.w3.org/2000/svg";
+var anims = [];
+var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function lerp(a,b,t){ return a+(b-a)*t; }
+function frameLerp(f0, f1, t){
+  return {
+    h:[ lerp(f0.h[0],f1.h[0],t), lerp(f0.h[1],f1.h[1],t) ],
+    l: f0.l.map(function(line,i){
+      return line.map(function(p,j){ return [ lerp(p[0],f1.l[i][j][0],t), lerp(p[1],f1.l[i][j][1],t) ]; });
+    })
+  };
+}
+function drawPose(el, pose){
+  el.head.setAttribute("cx", pose.h[0].toFixed(1));
+  el.head.setAttribute("cy", pose.h[1].toFixed(1));
+  pose.l.forEach(function(line,i){
+    el.paths[i].setAttribute("d", "M"+line.map(function(p){ return p[0].toFixed(1)+" "+p[1].toFixed(1); }).join(" L"));
+  });
+}
+function buildDemo(ex, container){
+  var svg = document.createElementNS(SVGNS,"svg");
+  svg.setAttribute("viewBox","0 0 120 124");
+  svg.setAttribute("width","112");
+  svg.setAttribute("aria-hidden","true");
+  var ground = document.createElementNS(SVGNS,"line");
+  ground.setAttribute("x1","8"); ground.setAttribute("y1","116");
+  ground.setAttribute("x2","112"); ground.setAttribute("y2","116");
+  ground.setAttribute("stroke","#C9D6CD"); ground.setAttribute("stroke-width","2");
+  ground.setAttribute("stroke-linecap","round");
+  svg.appendChild(ground);
+  var rec = { ex:ex, paths:[], head:null };
+  ex.frames[0].l.forEach(function(){
+    var p = document.createElementNS(SVGNS,"path");
+    p.setAttribute("fill","none"); p.setAttribute("stroke","#2E7D5B");
+    p.setAttribute("stroke-width","5"); p.setAttribute("stroke-linecap","round");
+    p.setAttribute("stroke-linejoin","round");
+    svg.appendChild(p); rec.paths.push(p);
+  });
+  var head = document.createElementNS(SVGNS,"circle");
+  head.setAttribute("r","8"); head.setAttribute("fill","#E4F0EA");
+  head.setAttribute("stroke","#2E7D5B"); head.setAttribute("stroke-width","4");
+  svg.appendChild(head); rec.head = head;
+  container.appendChild(svg);
+  drawPose(rec, ex.frames[0]);
+  if (!reducedMotion) anims.push(rec);
+}
+if (!reducedMotion){
+  var tick = function(now){
+    for (var i=0;i<anims.length;i++){
+      var r = anims[i];
+      var t = (now % r.ex.period) / r.ex.period;         // 0..1
+      var p = t < .5 ? t*2 : (1-t)*2;                     // 往返
+      var e = .5 - .5*Math.cos(p*Math.PI);                // 缓动
+      drawPose(r, frameLerp(r.ex.frames[0], r.ex.frames[1], e));
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+/* ================= 头部 ================= */
+$("#todayDate").textContent = today.getFullYear()+"年"+(today.getMonth()+1)+"月"+today.getDate()+"日";
+$("#todayWeek").textContent = WEEKS[today.getDay()] + " · 计划每日自动更新";
+$("#dropIc").innerHTML = ICONS.drop;
+$("#scaleIc").innerHTML = ICONS.scale;
+
+/* ================= 目标 ================= */
+function renderGoals(){
+  var activeKey = planOf(today).rest ? "rest" : "train";
+  $("#goalCycle").innerHTML = Object.keys(GOALS).map(function(k){
+    var g = GOALS[k], on = k === activeKey;
+    return '<div class="cycle-day'+(on?' on':'')+'">'
+      + '<span class="cd-label">'+g.label+(on?' · 今天':'')+'</span>'
+      + '<span class="cd-kcal">'+g.kcal+'<small> kcal</small></span>'
+      + '<span class="cd-macros"><span>蛋白 '+g.p+' g</span><span>碳水 '+g.c+' g</span><span>脂肪 '+g.f+' g</span></span>'
+      + '</div>';
+  }).join("");
+  var g = GOALS[activeKey];
+  $("#chipKcal").textContent = g.kcal;
+  var rows = [
+    ["蛋白质", g.p, g.p*4, "#2E7D5B"],
+    ["碳水",   g.c, g.c*4, "#E9C46A"],
+    ["脂肪",   g.f, g.f*9, "#D95D39"]
+  ];
+  $("#macroBars").innerHTML = rows.map(function(r){
+    var pct = Math.round(r[2]/g.kcal*100);
+    return '<div class="macro-row"><span class="lab">'+r[0]+'</span>'
+      + '<span class="bar"><i style="width:'+pct+'%;background:'+r[3]+'"></i></span>'
+      + '<span class="val">'+r[1]+' g · '+pct+'%</span></div>';
+  }).join("");
+  $("#goalTip").innerHTML = g.tip + "　今日目标 <b>"+g.kcal+"</b> kcal，每周平均约 2400 kcal。";
+}
+
+/* ================= 餐单 ================= */
+function renderMenu(){
+  var key = keyOf(viewDate);
+  var isToday = key === keyOf(today);
+  var menu = MENUS[dayIdx(viewDate)];
+  var plan = planOf(viewDate);
+  $("#dayLabel").innerHTML = (viewDate.getMonth()+1)+"月"+viewDate.getDate()+"日 "+WEEKS[viewDate.getDay()]
+    + "<small>" + (isToday ? "今天 · " : "") + menu.tag + (plan.rest ? " · 休息日" : " · 训练日") + "</small>";
+
+  var banner = $("#dayBanner");
+  if (plan.rest){
+    banner.className = "banner rest";
+    banner.innerHTML = "<b>今天是休息日：</b>晚餐主食减半拳，出门快走 8000 步，睡前拉伸 10 分钟。";
+  } else {
+    banner.className = "banner train";
+    banner.innerHTML = "<b>今天是"+TRAIN[plan.idx].title.split(" · ")[0]+"：</b>"+TRAIN[plan.idx].title.split(" · ")[1]
+      +"，练后 30 分钟内把加餐的酸奶吃掉，蛋白质趁窗口期补上。";
+  }
+
+  var done = store.get("done:"+key, {});
+  var grid = $("#mealGrid");
+  grid.innerHTML = "";
+  var total = 0, proTotal = 0, doneCount = 0;
+
+  menu.meals.forEach(function(m, i){
+    total += m.kcal;
+    proTotal += m.pro;
+    if (done[i]) doneCount++;
+    var card = document.createElement("article");
+    card.className = "meal" + (done[i] ? " done" : "");
+    card.innerHTML =
+      '<div class="meal-top">'+
+        '<span class="ic">'+ICONS[MEAL_ICON[m.name]]+'</span>'+
+        '<span><span class="nm">'+m.name+'</span><div class="tm">建议 '+m.time+' 前后吃</div></span>'+
+        '<span class="meta"><span class="pro">蛋白 '+m.pro+' g</span><span class="kc">≈ '+m.kcal+' kcal</span></span>'+
+      '</div>'+
+      '<ul>'+ m.items.map(function(it){ return "<li>"+it+"</li>"; }).join("") +'</ul>';
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "check";
+    btn.setAttribute("aria-pressed", String(!!done[i]));
+    btn.textContent = done[i] ? "已完成" : "标记完成";
+    btn.addEventListener("click", function(){
+      var d = store.get("done:"+key, {});
+      d[i] = !d[i];
+      store.set("done:"+key, d);
+      renderMenu();
+    });
+    card.appendChild(btn);
+    grid.appendChild(card);
+  });
+
+  $("#progFill").style.width = (doneCount/menu.meals.length*100)+"%";
+  $("#progText").textContent = "今日完成 "+doneCount+"/"+menu.meals.length+" 餐";
+  var g = goalFor(plan);
+  var proNote = proTotal >= 87 ? "" : "，今天蛋白偏低，补一份肉、奶或两个鸡蛋";
+  $("#totalLine").innerHTML = "当日合计 <b>≈ "+total+" kcal · 蛋白 ≈ "+proTotal+" g</b> / 目标 "+g.kcal+" kcal，蛋白 87~145 g 即达标"+proNote;
+}
+
+$("#prevDay").addEventListener("click", function(){ viewDate.setDate(viewDate.getDate()-1); renderMenu(); renderTraining(); });
+$("#nextDay").addEventListener("click", function(){ viewDate.setDate(viewDate.getDate()+1); renderMenu(); renderTraining(); });
+
+/* ================= 训练 ================= */
+function renderTraining(){
+  var key = keyOf(viewDate);
+  var plan = planOf(viewDate);
+  var box = $("#trainBox");
+  box.innerHTML = "";
+
+  if (plan.rest){
+    $("#trainNote").textContent = "肌肉在休息时生长，别加练";
+    var rc = document.createElement("div");
+    rc.className = "restcard";
+    rc.innerHTML = '<div class="big">'+ICONS.walk+'</div>'+
+      '<div><div class="tt">主动恢复日</div>'+
+      '<div class="dd">快走或散步 8000 步 · 睡前拉伸 10 分钟（大腿前侧 / 后侧 / 髋部 / 胸椎各 2 组 × 30 秒）· 23:00 前睡觉</div></div>';
+    box.appendChild(rc);
+    return;
+  }
+
+  var t = TRAIN[plan.idx];
+  $("#trainNote").textContent = t.title + " · 约 " + t.mins + " 分钟 · 组间休息 60 秒";
+
+  var warm = document.createElement("div");
+  warm.className = "warmup";
+  warm.innerHTML = "<b>先热身：</b>" + t.warm;
+  box.appendChild(warm);
+
+  var done = store.get("exdone:"+key, {});
+  var grid = document.createElement("div");
+  grid.className = "exs";
+
+  t.exs.forEach(function(exId, i){
+    var ex = EX[exId];
+    var card = document.createElement("article");
+    card.className = "ex" + (done[i] ? " done" : "");
+    var demo = document.createElement("div");
+    demo.className = "demo";
+    buildDemo(ex, demo);
+    card.appendChild(demo);
+
+    var info = document.createElement("div");
+    info.className = "exinfo";
+    info.innerHTML =
+      '<div class="nm">'+ex.name+'<span class="sets">'+ex.sets+'</span></div>'+
+      '<ul class="cues">'+ ex.cues.map(function(c){ return "<li>"+c+"</li>"; }).join("") +'</ul>'+
+      '<a class="src" href="'+VIDEOS[ex.video]+'" target="_blank" rel="noopener">看视频学动作 &#8599;</a>';
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "check";
+    btn.setAttribute("aria-pressed", String(!!done[i]));
+    btn.textContent = done[i] ? "已完成" : "标记完成";
+    btn.addEventListener("click", function(){
+      var d = store.get("exdone:"+key, {});
+      d[i] = !d[i];
+      store.set("exdone:"+key, d);
+      renderTraining();
+    });
+    info.appendChild(btn);
+    card.appendChild(info);
+    grid.appendChild(card);
+  });
+  box.appendChild(grid);
+}
+
+/* ================= 护肤 ================= */
+// 护肤是每天固定流程，打卡跟"今天"走，不随上一天/下一天翻页变化
+function renderSkin(){
+  var done = store.get("skin:"+keyOf(today), {});
+  [["Am","am"],["Pm","pm"]].forEach(function(p){
+    var on = !!done[p[1]];
+    $("#skin"+p[0]+"Card").classList.toggle("done", on);
+    var btn = $("#skin"+p[0]+"Btn");
+    btn.textContent = on ? "已完成" : "标记完成";
+    btn.setAttribute("aria-pressed", String(on));
+  });
+}
+[["#skinAmBtn","am"],["#skinPmBtn","pm"]].forEach(function(p){
+  $(p[0]).addEventListener("click", function(){
+    var d = store.get("skin:"+keyOf(today), {});
+    d[p[1]] = !d[p[1]];
+    store.set("skin:"+keyOf(today), d);
+    renderSkin();
+  });
+});
+
+/* ================= 饮水 ================= */
+function renderWater(){
+  var key = "water:"+keyOf(today);
+  var n = store.get(key, 0);
+  var cups = $("#cups");
+  cups.innerHTML = "";
+  for (var i=0; i<8; i++){
+    (function(i){
+      var c = document.createElement("button");
+      c.type = "button";
+      c.className = "cup" + (i<n ? " on" : "");
+      c.setAttribute("aria-label", "第"+(i+1)+"杯");
+      c.innerHTML = "<i></i>";
+      c.addEventListener("click", function(){
+        var cur = store.get(key,0);
+        store.set(key, (i+1===cur) ? i : i+1);
+        renderWater();
+      });
+      cups.appendChild(c);
+    })(i);
+  }
+  $("#waterLine").innerHTML = "已喝 <b>"+n+"/8</b> 杯（约 "+(n*360)+" ml）"+ (n>=8 ? " · 今天的水喝够了" : "");
+}
+
+/* ================= 体重 ================= */
+function renderWeights(){
+  var list = store.get("weights", []);
+  var box = $("#wChart"), stats = $("#wStats");
+  if (!list.length){
+    box.innerHTML = '<p class="empty">还没有记录，明早空腹称一次开始</p>';
+    stats.textContent = "";
+    return;
+  }
+  var last = list.slice(-10);
+  var ws = last.map(function(e){ return e.w; });
+  var min = Math.min.apply(null, ws), max = Math.max.apply(null, ws);
+  var span = Math.max(max-min, 0.4);
+  box.innerHTML = '<div class="wbars">'+ last.map(function(e){
+    var h = 18 + (e.w-min)/span*66;
+    return '<div class="wbar"><div class="b" style="height:'+h+'px" title="'+e.d+" · "+e.w+' kg"></div>'+
+           '<div class="t">'+e.d.slice(5)+"</div></div>";
+  }).join("") +'</div>';
+  var first = list[0], newest = list[list.length-1];
+  var delta = (newest.w - first.w);
+  stats.innerHTML = "最新 <b>"+newest.w+" kg</b>（"+newest.d+"） · 较首次记录 "+
+    (delta>0?"+":"") + delta.toFixed(1) + " kg · 共 "+list.length+" 次";
+}
+$("#wAdd").addEventListener("click", function(){
+  var v = parseFloat($("#wInput").value);
+  if (!isFinite(v) || v<40 || v>150){ $("#wInput").focus(); return; }
+  var list = store.get("weights", []);
+  var k = keyOf(today);
+  var found = false;
+  for (var i=0;i<list.length;i++){ if (list[i].d===k){ list[i].w=v; found=true; break; } }
+  if (!found) list.push({ d:k, w:v });
+  list.sort(function(a,b){ return a.d<b.d?-1:1; });
+  store.set("weights", list.slice(-90));
+  $("#wInput").value = "";
+  renderWeights();
+});
+
+/* ================= 干货 ================= */
+$("#principles").innerHTML = PRINCIPLES.map(function(p, i){
+  return '<div class="p"><span class="no">'+(i+1)+'</span><div><div class="tt">'+p[0]+'</div><div class="dd">'+p[1]+"</div></div></div>";
+}).join("");
+
+/* ================= 到点提醒 ================= */
+// ponytail: 浏览器通知只在页面打开时有效；真正的后台推送需要服务端 Push API，单机 HTML 做不到。
+var toggle = $("#notifyToggle");
+toggle.checked = store.get("notify", false);
+toggle.addEventListener("change", function(){
+  if (toggle.checked && "Notification" in window && Notification.permission === "default"){
+    Notification.requestPermission();
+  }
+  store.set("notify", toggle.checked);
+});
+setInterval(function(){
+  if (!store.get("notify", false) || !("Notification" in window) || Notification.permission !== "granted") return;
+  var now = new Date();
+  var hm = pad(now.getHours())+":"+pad(now.getMinutes());
+  var fired = store.get("fired:"+keyOf(today), []);
+  [["07:30","早餐","先吃菜，再吃肉，最后主食，七分饱。"],
+   ["12:00","午餐","先吃菜，再吃肉，最后主食，七分饱。"],
+   ["15:30","加餐","酸奶或水果，别碰奶茶零食。"],
+   ["18:30","晚餐","晚餐主食 1 拳，七分饱停筷。"],
+   ["22:30","晚间护肤","洁面 → 薄涂阿达帕林 → 保湿，明早出门记得防晒。"]].forEach(function(m){
+    if (hm === m[0] && fired.indexOf(m[0]) < 0){
+      fired.push(m[0]);
+      store.set("fired:"+keyOf(today), fired);
+      new Notification("谭式餐桌 · "+m[1], { body:m[2] });
+    }
+  });
+}, 30000);
+
+/* ================= 启动 ================= */
+renderGoals();
+renderMenu();
+renderTraining();
+renderSkin();
+renderWater();
+renderWeights();
+</script>
+</body>
+</html>
