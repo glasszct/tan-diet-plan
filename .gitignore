@@ -1,0 +1,13 @@
+work/mail-secret.txt
+work/mail-body.html
+work/mail-preview.html
+work/mail-sent.txt
+work/*.log
+*.pid
+公网地址.txt
+/daily-mail.yml
+/mail-plan.js
+/pages.yml
+/smtp-send.js
+/谭式餐桌.html
+.gh-config/
